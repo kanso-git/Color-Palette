@@ -1,0 +1,31 @@
+ rc-slider with custom marks, we need to set step to null
+ marks={{
+          50: {
+            style: "",
+            label: "50",
+          },
+          100: {
+            style: "",
+            label: "100",
+          },
+          200: {
+            style: "",
+            label: "200",
+          },
+          400: {
+            style: "",
+            label: "400",
+          },
+          500: {
+            style: "",
+            label: "500",
+          },
+          800: {
+            style: "",
+            label: "800",
+          },
+          900: {
+            style: "",
+            label: "900",
+          },
+        }}
