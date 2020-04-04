@@ -48,7 +48,6 @@ const Palette = ({ palette }: IPaletteProps) => {
   };
   return (
     <div className="Palette">
-      {/* Navbar goes here */}
       <Navbar
         sliderChange={handleSLiderChange}
         level={level}
@@ -57,10 +56,18 @@ const Palette = ({ palette }: IPaletteProps) => {
       <div className="Palette-colors">
         {/** bunch of color boxes */}
         {palette.colors[level].map((c) => (
-          <ColorBox key={c.hex} color={c} format={format} />
+          <ColorBox
+            key={c.hex}
+            paletteId={palette.id}
+            color={c}
+            format={format}
+          />
         ))}
       </div>
-      {/** footer eventualy */}
+      <footer className="Palette-footer">
+        {palette.paletteName}
+        <span className="emoji">{palette.emoji}</span>
+      </footer>
     </div>
   );
 };

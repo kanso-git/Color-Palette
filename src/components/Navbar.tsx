@@ -4,19 +4,11 @@ import React, { ChangeEvent, useState } from "react";
 import Slider from "rc-slider";
 
 import Select from "@material-ui/core/Select";
-import { makeStyles, Theme, createStyles, MenuItem } from "@material-ui/core";
+import { MenuItem, IconButton } from "@material-ui/core";
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    formControl: {
-      margin: theme.spacing(1),
-      minWidth: 120,
-    },
-    selectEmpty: {
-      marginTop: theme.spacing(2),
-    },
-  })
-);
+import Snackbar from "@material-ui/core/Snackbar";
+import CloseIcon from "@material-ui/icons/Close";
+import { Link } from "react-router-dom";
 
 interface INavbarProps {
   sliderChange: (val: number) => void;
@@ -26,10 +18,15 @@ interface INavbarProps {
 
 const Navbar = ({ level, sliderChange, onChangeSelect }: INavbarProps) => {
   const [format, setFormat] = useState("hex");
+  const [snackOpened, setSnackOpened] = useState(false);
+
+  const handleCloseSnackbar = () => {
+    setSnackOpened(false);
+  };
   return (
     <header className="Navbar">
       <div className="logo">
-        <a href="#">Color Palette</a>
+        <Link to="/">Color Palette</Link>
       </div>
       <div className="slide-container">
         <span>Level:{level}</span>
@@ -48,6 +45,7 @@ const Navbar = ({ level, sliderChange, onChangeSelect }: INavbarProps) => {
           onChange={(e: ChangeEvent<any>) => {
             const val = e.target.value;
             setFormat(val);
+            setSnackOpened(true);
             onChangeSelect(val);
           }}
           value={format}
@@ -57,6 +55,28 @@ const Navbar = ({ level, sliderChange, onChangeSelect }: INavbarProps) => {
           <MenuItem value="rgba">RGBA - rgba(255,255,255,0.1)</MenuItem>
         </Select>
       </div>
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        open={snackOpened}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        message={
+          <span id="message-id">Format Changed! to {format.toUpperCase()}</span>
+        }
+        ContentProps={{
+          "aria-describedby": "message-id",
+        }}
+        action={[
+          <IconButton
+            key="closeIcon"
+            color="inherit"
+            aria-label="close"
+            onClick={() => setSnackOpened(false)}
+          >
+            <CloseIcon />
+          </IconButton>,
+        ]}
+      />
     </header>
   );
 };

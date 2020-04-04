@@ -29,3 +29,27 @@
             label: "900",
           },
         }}
+        ---
+
+
+
+librairies used in the project 
+marterial-ui at https://material-ui.com/
+chromajs npm at https://vis4.net/chromajs/#chroma
+emoji-mart at https://missive.github.io/emoji-mart/
+react-sortable-hoc at https://github.com/clauderic/react-sortable-hoc
+react-copy-to-clipboard at https://www.npmjs.com/package/react-copy-to-clipboard
+react-form-validator-core
+react-transition-group
+jss
+usage of pureComponent
+-----------
+
+
+https://github.com/react-component/slider
+https://zillow.github.io/react-slider/#reactslider
+
+
+AIEC remote playGround
+
+http://192.168.99.106:4466/aiec-dev

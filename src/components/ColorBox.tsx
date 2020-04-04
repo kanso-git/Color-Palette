@@ -2,28 +2,37 @@ import "./ColorBox.css";
 import React, { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { IColorExtended } from "./Palette";
+import { Link } from "react-router-dom";
 
 interface ColorBoxProps {
   color: IColorExtended;
+  paletteId: string;
   format: string;
+  withoutMoreLink?: boolean;
 }
-const ColorBox = ({ color, format }: ColorBoxProps) => {
+const ColorBox = ({
+  paletteId,
+  color,
+  format,
+  withoutMoreLink,
+}: ColorBoxProps) => {
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
+  const myColor = color[format as "rgb" | "rgba" | "hex"];
   return (
-    <CopyToClipboard text={color.hex} onCopy={() => handleCopy()}>
-      <div style={{ background: color.hex }} className="ColorBox">
+    <CopyToClipboard text={myColor} onCopy={() => handleCopy()}>
+      <div style={{ background: myColor }} className="ColorBox">
         <div
-          style={{ background: color.hex }}
+          style={{ background: myColor }}
           className={`copy-overlay  ${copied && " show"}`}
         />
 
         <div className={`copy-msg  ${copied && " show"}`}>
           <h1>copied</h1>
-          <p>{color[format as "rgb" | "rgba" | "hex"]}</p>
+          <p>{myColor}</p>
         </div>
         <div className="copy-container">
           <div className="box-content">
@@ -31,7 +40,14 @@ const ColorBox = ({ color, format }: ColorBoxProps) => {
           </div>
           <button className="copy-button">Copy</button>
         </div>
-        <span className="see-more"> More</span>
+        {withoutMoreLink || (
+          <Link
+            to={`/palettes/${paletteId}/${color.id}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="see-more"> More</span>
+          </Link>
+        )}
       </div>
     </CopyToClipboard>
   );
