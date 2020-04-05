@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { withRouter } from "react-router-dom";
 import styles from "../styles/MiniPaletteStyles";
 import { IColor } from "../actions";
@@ -26,4 +26,4 @@ const MiniPalette = ({ colors, id, paletteName, emoji, history }: any) => {
   );
 };
 
-export default withRouter(MiniPalette);
+export default memo(withRouter(MiniPalette));

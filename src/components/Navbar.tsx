@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useState, useContext } from "react";
 
 import Slider from "rc-slider";
 import Select from "@material-ui/core/Select";
@@ -9,27 +9,50 @@ import { Link } from "react-router-dom";
 
 import "rc-slider/assets/index.css";
 import styles from "../styles/NavbarStyles";
+import {
+  IPalette,
+  DEFAULT_LEVEL,
+  EActionType,
+  DEFAULT_FORMAT,
+} from "../actions";
+import { DispatchContext } from "../context/colorPalette.context";
 
 interface INavbarProps {
-  sliderChange?: (val: number) => void;
-  onChangeSelect: (val: string) => void;
-  level?: number;
+  isSingleColorPalette: boolean;
+  palette: IPalette;
 }
 
-const Navbar = ({ level, sliderChange, onChangeSelect }: INavbarProps) => {
+const Navbar = ({ isSingleColorPalette, palette }: INavbarProps) => {
   const classes = styles();
-  const [format, setFormat] = useState("hex");
+
+  const dispatch = useContext(DispatchContext);
+  const level: number = palette.props ? palette.props.level : DEFAULT_LEVEL;
+  const format: string = palette.props ? palette.props.format : DEFAULT_FORMAT;
+
   const [snackOpened, setSnackOpened] = useState(false);
 
   const handleCloseSnackbar = () => {
     setSnackOpened(false);
+  };
+
+  const sliderChange = (val: number) => {
+    dispatch({
+      type: EActionType.CHANGE_PROPS,
+      payload: {
+        id: palette.id,
+        newProps: {
+          format: format,
+          level: val,
+        },
+      },
+    });
   };
   return (
     <header className={classes.Navbar}>
       <div className={classes.logo}>
         <Link to="/">Color Palette</Link>
       </div>
-      {sliderChange && (
+      {!isSingleColorPalette && (
         <div>
           <span>Level:{level}</span>
           <div className={classes.slider}>
@@ -48,9 +71,17 @@ const Navbar = ({ level, sliderChange, onChangeSelect }: INavbarProps) => {
         <Select
           onChange={(e: ChangeEvent<any>) => {
             const val = e.target.value;
-            setFormat(val);
             setSnackOpened(true);
-            onChangeSelect(val);
+            dispatch({
+              type: EActionType.CHANGE_PROPS,
+              payload: {
+                id: palette.id,
+                newProps: {
+                  format: val,
+                  level: level,
+                },
+              },
+            });
           }}
           value={format}
         >
@@ -62,7 +93,7 @@ const Navbar = ({ level, sliderChange, onChangeSelect }: INavbarProps) => {
       <Snackbar
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         open={snackOpened}
-        autoHideDuration={6000}
+        autoHideDuration={3000}
         onClose={handleCloseSnackbar}
         message={
           <span id="message-id">Format Changed! to {format.toUpperCase()}</span>

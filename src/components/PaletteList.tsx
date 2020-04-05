@@ -1,12 +1,14 @@
-import React from "react";
-import seedPalettes from "./seedPalettes";
+import React, { useContext } from "react";
 import MiniPalette from "./MiniPalette";
 import styles from "../styles/PaletteListStyles";
 import { Link } from "react-router-dom";
+import { ColorPaletteContext } from "../context/colorPalette.context";
 
 const PaletteList = () => {
   const classes = styles();
-  const miniPalettes = seedPalettes.map((p) => {
+  const palettes = useContext(ColorPaletteContext);
+
+  const miniPalettes = palettes.map((p) => {
     return <MiniPalette key={p.id} {...p} />;
   });
 

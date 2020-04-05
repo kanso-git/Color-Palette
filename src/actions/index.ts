@@ -2,6 +2,7 @@ export enum EActionType {
   ADD = "ADD",
   REMOVE = "REMOVE",
   EDIT = "EDIT",
+  CHANGE_PROPS = "CHANGE_PROPS",
 }
 export default interface IAction {
   type: EActionType;

@@ -1,29 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import styles from "../styles/PaletteStyles";
 
 import ColorBox from "./ColorBox";
 import Navbar from "./Navbar";
 import PaletteFooter from "./PaletteFooter";
-import { IPalette, IColorExtended } from "../actions";
+import { IPalette, IColorExtended, DEFAULT_FORMAT } from "../actions";
+import { ColorPaletteContext } from "../context/colorPalette.context";
+import { generatePaletteColors } from "./colorHelper";
 
 interface SingleColorPaletteProps {
-  palette: IPalette;
+  paletteId: string;
   colorId: string;
-  format: string;
 }
 
 const SingleColorPalette = ({
-  palette,
+  paletteId,
   colorId,
-  format,
 }: SingleColorPaletteProps) => {
   const classes = styles();
-  const [formatVal, setFormaVal] = useState(format);
-  const handleChangeSelect = (val: string) => {
-    setFormaVal(val);
-  };
+  const palettes = useContext(ColorPaletteContext);
 
+  const palette = palettes.find((p) => p.id === paletteId) as IPalette;
+  if (Object.keys(palette.colorsExtended).length === 0) {
+    palette.colorsExtended = generatePaletteColors(palette.colors);
+  }
+
+  const format: string = palette.props ? palette.props.format : DEFAULT_FORMAT;
   const { colorsExtended } = palette;
   const keys = Object.keys(colorsExtended);
   const shades: IColorExtended[] = [];
@@ -37,14 +40,14 @@ const SingleColorPalette = ({
 
   return (
     <div className={classes.palette}>
-      <Navbar onChangeSelect={handleChangeSelect} />
+      <Navbar palette={palette} isSingleColorPalette={true} />
       <div className={classes.paletteColors}>
         {shades.slice(1).map((s, i) => (
           <ColorBox
             key={i}
             color={s}
             paletteId={palette.id}
-            format={formatVal}
+            format={format}
             isForSinglePalette
           />
         ))}

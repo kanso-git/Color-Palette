@@ -1,9 +1,14 @@
-import IAction, { IState, DEFAULT_FORMAT, DEFAULT_LEVEL } from "../actions";
+import IAction, {
+  IState,
+  DEFAULT_FORMAT,
+  DEFAULT_LEVEL,
+  EActionType,
+} from "../actions";
 
 const reducer = (palettes: IState, action: IAction) => {
   console.log(action.type);
   switch (action.type) {
-    case "ADD":
+    case EActionType.ADD:
       return [
         ...palettes,
         {
@@ -15,10 +20,17 @@ const reducer = (palettes: IState, action: IAction) => {
         },
       ];
 
-    case "REMOVE":
+    case EActionType.REMOVE:
       return palettes.filter((palette) => palette.id !== action.payload.id);
 
-    case "EDIT":
+    case EActionType.CHANGE_PROPS:
+      return palettes.map((palette) =>
+        palette.id === action.payload.id
+          ? { ...palette, props: action.payload.newProps }
+          : palette
+      );
+
+    case EActionType.EDIT:
       return palettes.map((palette) =>
         palette.id === action.payload.id
           ? { ...palette, ...action.payload.newPalette }

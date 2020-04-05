@@ -1,45 +1,35 @@
-import React, { useState } from "react";
+import React, { useContext } from "react";
 import styles from "../styles/PaletteStyles";
 
 import ColorBox from "./ColorBox";
 import Navbar from "./Navbar";
 import PaletteFooter from "./PaletteFooter";
 import { IPalette, DEFAULT_LEVEL, DEFAULT_FORMAT } from "../actions";
+import { ColorPaletteContext } from "../context/colorPalette.context";
+import { generatePaletteColors } from "./colorHelper";
 
 interface IPaletteProps {
-  palette: IPalette;
+  paletteId: string;
 }
 
 const Palette = (props: IPaletteProps) => {
-  const { palette } = props;
   const classes = styles(props);
 
-  const myLevel = palette.props
-    ? palette.props.level
-    : (DEFAULT_LEVEL as number);
-  const myFormat = palette.props
-    ? palette.props.format
-    : (DEFAULT_FORMAT as string);
+  const { paletteId } = props;
+  const palettes = useContext(ColorPaletteContext);
 
-  const [level, setLevel] = useState(myLevel);
-  const [format, setFormat] = useState(myFormat);
+  const palette = palettes.find((p) => p.id === paletteId) as IPalette;
+  if (Object.keys(palette.colorsExtended).length === 0) {
+    palette.colorsExtended = generatePaletteColors(palette.colors);
+  }
 
-  const handleSLiderChange = (val: number) => {
-    //const levels = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
-    setLevel(val);
-  };
-  const handleChangeSelect = (val: string) => {
-    setFormat(val);
-  };
+  const level: number = palette.props ? palette.props.level : DEFAULT_LEVEL;
+  const format: string = palette.props ? palette.props.format : DEFAULT_FORMAT;
+
   return (
     <div className={classes.palette}>
-      <Navbar
-        sliderChange={handleSLiderChange}
-        level={level}
-        onChangeSelect={handleChangeSelect}
-      />
+      <Navbar palette={palette} isSingleColorPalette={false} />
       <div className={classes.paletteColors}>
-        {/** bunch of color boxes */}
         {palette.colorsExtended[level].map((c) => (
           <ColorBox
             key={c.hex}
