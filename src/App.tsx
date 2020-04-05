@@ -1,36 +1,34 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Route, Switch, RouteComponentProps } from "react-router-dom";
 import Palette from "./components/Palette";
-import seedPalettes from "./components/seedPalettes";
-import { generatePalette } from "./components/colorHelper";
+import { generatePaletteColors } from "./components/colorHelper";
 import PaletteList from "./components/PaletteList";
 import SingleColorPalette from "./components/SingleColorPalette";
+import NewPaletteForm from "./components/NewPaletteForm";
+import Playground from "./components/Playground";
+import { ColorPaletteContext } from "./context/colorPalette.context";
 
 function App() {
+  const palettes = useContext(ColorPaletteContext);
+
   const renderPalette = (props: RouteComponentProps<any>): JSX.Element => {
     const { id } = props.match.params;
-    const palette = seedPalettes.find((p) => p.id === id);
+    const palette = palettes.find((p) => p.id === id);
     if (palette) {
-      return <Palette palette={generatePalette(palette)} />;
+      palette.colorsExtended = generatePaletteColors(palette.colors);
+      return <Palette palette={palette} />;
     }
     return <h1 />;
   };
 
-  const renderPaletteList = (props: RouteComponentProps<any>): JSX.Element => (
-    <PaletteList />
-  );
-
   const renderColorPalette = (props: RouteComponentProps<any>): JSX.Element => {
     const { paletteId, colorId } = props.match.params;
 
-    const palette = seedPalettes.find((p) => p.id === paletteId);
+    const palette = palettes.find((p) => p.id === paletteId);
     if (palette) {
+      palette.colorsExtended = generatePaletteColors(palette.colors);
       return (
-        <SingleColorPalette
-          palette={generatePalette(palette)}
-          colorId={colorId}
-          format="hex"
-        />
+        <SingleColorPalette palette={palette} colorId={colorId} format="hex" />
       );
     }
     return <h1></h1>;
@@ -38,12 +36,14 @@ function App() {
 
   return (
     <Switch>
-      <Route path="/" exact render={renderPaletteList} />
+      <Route path="/" exact render={() => <PaletteList />} />
+      <Route path="/palettes/new" exact render={() => <NewPaletteForm />} />
       <Route path="/palettes/:id" exact render={renderPalette} />
       <Route
         path="/palettes/:paletteId/:colorId"
         render={renderColorPalette}
       ></Route>
+      <Route path="/playground" render={() => <Playground />}></Route>
     </Switch>
   );
 }

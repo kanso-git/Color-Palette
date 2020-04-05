@@ -1,24 +1,21 @@
-import "./ColorBox.css";
 import React, { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import chroma from "chroma-js";
-import { IColorExtended } from "./Palette";
-import { Link } from "react-router-dom";
 
-interface ColorBoxProps {
+import styles from "../styles/ColorBoxStyles";
+import { Link } from "react-router-dom";
+import { IColorExtended } from "../actions";
+
+export interface ColorBoxProps {
   color: IColorExtended;
   paletteId: string;
   format: string;
-  withoutMoreLink?: boolean;
+  isForSinglePalette: boolean;
 }
-const ColorBox = ({
-  paletteId,
-  color,
-  format,
-  withoutMoreLink,
-}: ColorBoxProps) => {
-  const isDarkColor = chroma(color.rgb).luminance() <= 0.08;
-  const isLightColor = chroma(color.rgb).luminance() >= 0.7;
+
+const ColorBox = (props: ColorBoxProps) => {
+  const classes = styles(props);
+  const { paletteId, color, format, isForSinglePalette } = props;
+
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
     setCopied(true);
@@ -27,34 +24,31 @@ const ColorBox = ({
   const myColor = color[format as "rgb" | "rgba" | "hex"];
   return (
     <CopyToClipboard text={myColor} onCopy={() => handleCopy()}>
-      <div style={{ background: myColor }} className="ColorBox ">
+      <div style={{ background: myColor }} className={classes.colorBox}>
         <div
           style={{ background: myColor }}
-          className={`copy-overlay  ${copied && " show"}`}
+          className={` ${classes.copyOverlay}  ${
+            copied && classes.copyOverlayShow
+          }`}
         />
 
-        <div className={`copy-msg  ${copied && " show"}`}>
+        <div className={`${classes.copyMsg}  ${copied && classes.copyMsgShow}`}>
           <h1>copied</h1>
-          <p className={` ${isLightColor && "dark-text"}`}>{myColor}</p>
+          <p className={classes.copyText}>{myColor}</p>
         </div>
-        <div className="copy-container">
-          <div className="box-content">
-            <span className={`${isDarkColor && "light-text"}`}>
-              {color.name}
-            </span>
+        <div>
+          <div className={classes.boxContent}>
+            <span className={classes.colorName}>{color.name}</span>
           </div>
-          <button className={`copy-button ${isLightColor && "dark-text"}`}>
-            Copy
-          </button>
+          {/**`copy-button ${isLightColor && "dark-text"}` */}
+          <button className={classes.copyButton}>Copy</button>
         </div>
-        {withoutMoreLink || (
+        {!isForSinglePalette && (
           <Link
             to={`/palettes/${paletteId}/${color.id}`}
             onClick={(e) => e.stopPropagation()}
           >
-            <span className={`see-more ${isLightColor && "dark-text"}`}>
-              More
-            </span>
+            <span className={classes.seeMore}>More</span>
           </Link>
         )}
       </div>

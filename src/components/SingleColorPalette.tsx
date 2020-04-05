@@ -1,52 +1,55 @@
 import React, { useState } from "react";
-import { IPaletteExtended, IColorExtended, IColor } from "./Palette";
+import { Link } from "react-router-dom";
+import styles from "../styles/PaletteStyles";
+
 import ColorBox from "./ColorBox";
 import Navbar from "./Navbar";
 import PaletteFooter from "./PaletteFooter";
-import { Link } from "react-router-dom";
+import { IPalette, IColorExtended } from "../actions";
+
 interface SingleColorPaletteProps {
-  palette: IPaletteExtended;
+  palette: IPalette;
   colorId: string;
   format: string;
 }
+
 const SingleColorPalette = ({
   palette,
   colorId,
   format,
 }: SingleColorPaletteProps) => {
+  const classes = styles();
   const [formatVal, setFormaVal] = useState(format);
   const handleChangeSelect = (val: string) => {
     setFormaVal(val);
   };
 
-  const { colors } = palette;
-  const keys = Object.keys(colors);
+  const { colorsExtended } = palette;
+  const keys = Object.keys(colorsExtended);
   const shades: IColorExtended[] = [];
   keys.forEach((key) => {
     shades.push(
-      colors[(key as unknown) as number].find(
+      colorsExtended[(key as unknown) as number].find(
         (c) => c.id === colorId
       ) as IColorExtended
     );
   });
 
   return (
-    <div className="SingleColorPalette Palette">
+    <div className={classes.palette}>
       <Navbar onChangeSelect={handleChangeSelect} />
-      <div className="Palette-colors">
+      <div className={classes.paletteColors}>
         {shades.slice(1).map((s, i) => (
           <ColorBox
             key={i}
             color={s}
             paletteId={palette.id}
             format={formatVal}
-            withoutMoreLink
+            isForSinglePalette
           />
         ))}
-        <div className="go-back ColorBox">
-          <Link to={`/palettes/${palette.id}`} className="back-button">
-            Go Back
-          </Link>
+        <div className={classes.goBack}>
+          <Link to={`/palettes/${palette.id}`}>Go Back</Link>
         </div>
       </div>
       <PaletteFooter palette={palette} />

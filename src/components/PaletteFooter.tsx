@@ -1,13 +1,16 @@
 import React from "react";
-import { IPaletteExtended } from "./Palette";
+import styles from "../styles/FooterStyles";
+import { IPalette } from "../actions";
 interface PaletteFooterProps {
-  palette: IPaletteExtended;
+  palette: IPalette;
 }
+
 const PaletteFooter = ({ palette }: PaletteFooterProps) => {
+  const classes = styles();
   return (
-    <footer className="Palette-footer">
+    <footer className={classes.paletteFooter}>
       {palette.paletteName}
-      <span className="emoji">{palette.emoji}</span>
+      <span className={classes.emoji}>{palette.emoji}</span>
     </footer>
   );
 };

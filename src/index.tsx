@@ -4,11 +4,14 @@ import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
+import { ColorPaletteProvider } from "./context/colorPalette.context";
 
 ReactDOM.render(
-  <BrowserRouter>
-    <App />
-  </BrowserRouter>,
+  <ColorPaletteProvider>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </ColorPaletteProvider>,
   document.getElementById("root")
 );
 

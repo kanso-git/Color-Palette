@@ -1,44 +1,28 @@
-import "./Palette.css";
 import React, { useState } from "react";
+import styles from "../styles/PaletteStyles";
 
 import ColorBox from "./ColorBox";
 import Navbar from "./Navbar";
 import PaletteFooter from "./PaletteFooter";
-
-export interface IColor {
-  name: string;
-  color: string;
-}
-
-export interface IPalette {
-  id: string;
-  paletteName: string;
-  emoji: string;
-  colors: IColor[];
-}
-
-export interface IColorExtended {
-  name: string;
-  id: string;
-  hex: string;
-  rgb: string;
-  rgba: string;
-}
-export interface IPaletteExtended {
-  id: string;
-  paletteName: string;
-  emoji: string;
-  colors: {
-    [key: number]: IColorExtended[];
-  };
-}
+import { IPalette, DEFAULT_LEVEL, DEFAULT_FORMAT } from "../actions";
 
 interface IPaletteProps {
-  palette: IPaletteExtended;
+  palette: IPalette;
 }
-const Palette = ({ palette }: IPaletteProps) => {
-  const [level, setLevel] = useState(300);
-  const [format, setFormat] = useState("hex");
+
+const Palette = (props: IPaletteProps) => {
+  const { palette } = props;
+  const classes = styles(props);
+
+  const myLevel = palette.props
+    ? palette.props.level
+    : (DEFAULT_LEVEL as number);
+  const myFormat = palette.props
+    ? palette.props.format
+    : (DEFAULT_FORMAT as string);
+
+  const [level, setLevel] = useState(myLevel);
+  const [format, setFormat] = useState(myFormat);
 
   const handleSLiderChange = (val: number) => {
     //const levels = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
@@ -48,20 +32,21 @@ const Palette = ({ palette }: IPaletteProps) => {
     setFormat(val);
   };
   return (
-    <div className="Palette">
+    <div className={classes.palette}>
       <Navbar
         sliderChange={handleSLiderChange}
         level={level}
         onChangeSelect={handleChangeSelect}
       />
-      <div className="Palette-colors">
+      <div className={classes.paletteColors}>
         {/** bunch of color boxes */}
-        {palette.colors[level].map((c) => (
+        {palette.colorsExtended[level].map((c) => (
           <ColorBox
             key={c.hex}
             paletteId={palette.id}
             color={c}
             format={format}
+            isForSinglePalette={false}
           />
         ))}
       </div>
