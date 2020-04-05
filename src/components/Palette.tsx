@@ -1,8 +1,9 @@
 import "./Palette.css";
-import React, { useState, ChangeEvent } from "react";
+import React, { useState } from "react";
 
 import ColorBox from "./ColorBox";
 import Navbar from "./Navbar";
+import PaletteFooter from "./PaletteFooter";
 
 export interface IColor {
   name: string;
@@ -64,10 +65,7 @@ const Palette = ({ palette }: IPaletteProps) => {
           />
         ))}
       </div>
-      <footer className="Palette-footer">
-        {palette.paletteName}
-        <span className="emoji">{palette.emoji}</span>
-      </footer>
+      <PaletteFooter palette={palette} />
     </div>
   );
 };

@@ -11,9 +11,9 @@ import CloseIcon from "@material-ui/icons/Close";
 import { Link } from "react-router-dom";
 
 interface INavbarProps {
-  sliderChange: (val: number) => void;
+  sliderChange?: (val: number) => void;
   onChangeSelect: (val: string) => void;
-  level: number;
+  level?: number;
 }
 
 const Navbar = ({ level, sliderChange, onChangeSelect }: INavbarProps) => {
@@ -28,18 +28,21 @@ const Navbar = ({ level, sliderChange, onChangeSelect }: INavbarProps) => {
       <div className="logo">
         <Link to="/">Color Palette</Link>
       </div>
-      <div className="slide-container">
-        <span>Level:{level}</span>
-        <div className="slider">
-          <Slider
-            step={100}
-            min={100}
-            max={900}
-            defaultValue={level}
-            onAfterChange={sliderChange}
-          />
+      {sliderChange && (
+        <div className="slide-container">
+          <span>Level:{level}</span>
+          <div className="slider">
+            <Slider
+              step={100}
+              min={100}
+              max={900}
+              defaultValue={level}
+              onAfterChange={sliderChange}
+            />
+          </div>
         </div>
-      </div>
+      )}
+
       <div className="select-container">
         <Select
           onChange={(e: ChangeEvent<any>) => {

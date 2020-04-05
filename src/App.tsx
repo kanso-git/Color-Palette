@@ -29,6 +29,7 @@ function App() {
         <SingleColorPalette
           palette={generatePalette(palette)}
           colorId={colorId}
+          format="hex"
         />
       );
     }
