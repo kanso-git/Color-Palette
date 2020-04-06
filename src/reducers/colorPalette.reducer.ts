@@ -1,24 +1,10 @@
-import IAction, {
-  IState,
-  DEFAULT_FORMAT,
-  DEFAULT_LEVEL,
-  EActionType,
-} from "../actions";
+import IAction, { IState, EActionType } from "../actions";
 
 const reducer = (palettes: IState, action: IAction) => {
   console.log(action.type);
   switch (action.type) {
     case EActionType.ADD:
-      return [
-        ...palettes,
-        {
-          ...action.payload.palette,
-          props: {
-            format: DEFAULT_FORMAT,
-            LEVEL: DEFAULT_LEVEL,
-          },
-        },
-      ];
+      return [...palettes, action.payload.newPalette];
 
     case EActionType.REMOVE:
       return palettes.filter((palette) => palette.id !== action.payload.id);

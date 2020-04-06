@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { withRouter, RouteComponentProps } from "react-router-dom";
 import clsx from "clsx";
 import Drawer from "@material-ui/core/Drawer";
@@ -18,12 +18,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 import InboxIcon from "@material-ui/icons/MoveToInbox";
 import MailIcon from "@material-ui/icons/Mail";
 
-import {
-  ChromePicker,
-  ColorChangeHandler,
-  ColorResult,
-  RGBColor,
-} from "react-color";
+import { ChromePicker, ColorResult } from "react-color";
 import {
   makeStyles,
   useTheme,
@@ -33,9 +28,16 @@ import {
 import { Button } from "@material-ui/core";
 import DraggableColorBox from "./DraggableColorBox";
 import { ValidatorForm, TextValidator } from "react-material-ui-form-validator";
-import { IPalette } from "../actions";
+import { IPalette, EActionType } from "../actions";
+import {
+  DispatchContext,
+  ColorPaletteContext,
+} from "../context/colorPalette.context";
+import DraggableColorList from "./DraggableColorList";
+import { arrayMove } from "react-sortable-hoc";
 
 const drawerWidth = 400;
+const maxColorBoxInPalette = 20;
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
@@ -103,22 +105,28 @@ export interface NewColorProps {
 
 const NewPaletteForm = (props: RouteComponentProps) => {
   const classes = useStyles();
+  const palettes = useContext(ColorPaletteContext);
   const theme = useTheme();
-  const [open, setOpen] = useState(false);
-  const [colors, setColors] = useState<NewColorProps[]>([]);
-  const [color, setColor] = useState<string>("yellow");
 
-  const [newName, setNewName] = useState<string>("");
+  const dispatch = useContext(DispatchContext);
+
+  const [open, setOpen] = useState(false);
+  const [colors, setColors] = useState<NewColorProps[]>(palettes[0].colors);
+  const [color, setColor] = useState<string>("yellow");
+  const [colorName, setColorName] = useState<string>("");
+  const [paletteName, setPaletteName] = useState<string>("");
+
+  const isPaletteFull = colors.length >= maxColorBoxInPalette;
 
   useEffect(() => {
-    ValidatorForm.addValidationRule("isColorNameUnique", (value) => {
+    ValidatorForm.addValidationRule("colorNameUnique", (value) => {
       if (colors.find((c) => c.name.toLowerCase() === value.toLowerCase())) {
         return false;
       }
       return true;
     });
 
-    ValidatorForm.addValidationRule("isColorUnique", () => {
+    ValidatorForm.addValidationRule("colorUnique", () => {
       console.log(color);
       if (colors.find((c) => c.color === color)) {
         return false;
@@ -126,11 +134,23 @@ const NewPaletteForm = (props: RouteComponentProps) => {
       return true;
     });
 
+    ValidatorForm.addValidationRule("paletteNameUnique", (value) => {
+      if (
+        palettes.find(
+          (p) => p.paletteName.toLowerCase() === value.toLowerCase()
+        )
+      ) {
+        return false;
+      }
+      return true;
+    });
+
     return () => {
-      ValidatorForm.removeValidationRule("isColorNameUnique");
-      ValidatorForm.removeValidationRule("isColorUnique");
+      ValidatorForm.removeValidationRule("colorNameUnique");
+      ValidatorForm.removeValidationRule("colorUnique");
+      ValidatorForm.removeValidationRule("paletteNameUnique");
     };
-  }, [color, newName]);
+  }, [color, colorName, paletteName]);
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -147,26 +167,53 @@ const NewPaletteForm = (props: RouteComponentProps) => {
   const handleAddNewColor = () => {
     const newColor = {
       color,
-      name: newName,
+      name: colorName,
     };
     setColors(colors.concat(newColor));
-    setNewName("");
+    setColorName("");
   };
 
   const handleNewNameChange = (e: any) => {
-    setNewName(e.target.value);
+    setColorName(e.target.value);
+  };
+
+  const handlePaletteNameChange = (e: any) => {
+    setPaletteName(e.target.value);
   };
 
   const handleSavePalette = () => {
     const newPalette: IPalette = {
-      id: "my-palette",
-      paletteName: "my palette",
+      id: paletteName.trim().replace(/\s/g, "-"),
+      paletteName: paletteName,
       emoji: "FR",
       colors,
       colorsExtended: {},
     };
-    console.log(newPalette);
+    dispatch({
+      type: EActionType.ADD,
+      payload: {
+        newPalette,
+      },
+    });
     props.history.push("/");
+  };
+
+  const handleDeleteBoxByName = (name: string) => {
+    const newcolors = colors.filter((c) => c.name !== name);
+    setColors(newcolors);
+  };
+
+  const onSortEnd = ({ oldIndex, newIndex }: any) => {
+    setColors(arrayMove(colors, oldIndex, newIndex));
+  };
+
+  const addRandomColor = () => {
+    const allColors = palettes.map((p) => p.colors).flat();
+    const randIndex = Math.floor(Math.random() * allColors.length);
+    const randColor = allColors[randIndex];
+    if (randColor) {
+      setColors(colors.concat(randColor));
+    }
   };
   return (
     <div className={classes.root}>
@@ -191,13 +238,25 @@ const NewPaletteForm = (props: RouteComponentProps) => {
           <Typography variant="h6" noWrap>
             Persistent drawer
           </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSavePalette}
+          <ValidatorForm
+            onSubmit={handleSavePalette}
+            onError={() => alert("on error")}
           >
-            Save Palette
-          </Button>
+            <TextValidator
+              name={paletteName}
+              value={paletteName}
+              onChange={handlePaletteNameChange}
+              validators={["required", "paletteNameUnique"]}
+              errorMessages={[
+                "this field is required",
+                "Palette Name Already Taken",
+              ]}
+            />
+
+            <Button variant="contained" color="primary" type="submit">
+              Save Palette
+            </Button>
+          </ValidatorForm>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -218,10 +277,22 @@ const NewPaletteForm = (props: RouteComponentProps) => {
         <Typography variant="h4">Design Your Palette</Typography>
 
         <div>
-          <Button variant="contained" color="secondary">
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => setColors([])}
+          >
             Clear Palette
           </Button>
-          <Button variant="contained" color="primary">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={addRandomColor}
+            style={{
+              backgroundColor: isPaletteFull ? "grey" : "",
+            }}
+            disabled={isPaletteFull}
+          >
             Random Color
           </Button>
         </div>
@@ -236,10 +307,10 @@ const NewPaletteForm = (props: RouteComponentProps) => {
           onError={() => alert("on error")}
         >
           <TextValidator
-            name={newName}
-            value={newName}
+            name={colorName}
+            value={colorName}
             onChange={handleNewNameChange}
-            validators={["required", "isColorNameUnique", "isColorUnique"]}
+            validators={["required", "colorNameUnique", "colorUnique"]}
             errorMessages={[
               "this field is required",
               "Color Name Already Taken",
@@ -249,13 +320,14 @@ const NewPaletteForm = (props: RouteComponentProps) => {
 
           <Button
             variant="contained"
+            disabled={isPaletteFull}
             color="primary"
             type="submit"
             style={{
-              backgroundColor: color,
+              backgroundColor: isPaletteFull ? "grey" : color,
             }}
           >
-            Add Color
+            {isPaletteFull ? "Palette Full" : "Add Color"}
           </Button>
         </ValidatorForm>
       </Drawer>
@@ -265,10 +337,12 @@ const NewPaletteForm = (props: RouteComponentProps) => {
         })}
       >
         <div className={classes.drawerHeader} />
-
-        {colors.map((prop) => {
-          return <DraggableColorBox key={prop.name} colorProp={prop} />;
-        })}
+        <DraggableColorList
+          colors={colors}
+          deleteBoxByName={handleDeleteBoxByName}
+          axis="xy"
+          onSortEnd={onSortEnd}
+        />
       </main>
     </div>
   );
