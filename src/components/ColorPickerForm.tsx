@@ -1,18 +1,12 @@
-import {
-  Formik,
-  Field,
-  useField,
-  FormikHelpers,
-  FieldAttributes,
-} from "formik";
+import { Formik } from "formik";
 import * as yup from "yup";
 import { ChromePicker, ColorResult } from "react-color";
 import React, { useState } from "react";
 import { Button } from "@material-ui/core";
 import { NewColorProps } from "./NewPaletteForm";
-import TextField from "@material-ui/core/TextField";
 
 import { makeStyles } from "@material-ui/styles";
+import MaterialField from "./fomik/useMaterialInput";
 
 const useStyles = makeStyles({
   colorNameInput: {
@@ -27,32 +21,6 @@ const useStyles = makeStyles({
   },
 });
 
-type MyColorPickerFieldProps = {
-  label: string;
-  placeHolder: string;
-} & FieldAttributes<{}>;
-const MyColorPickerField: React.FC<MyColorPickerFieldProps> = ({
-  label,
-  placeHolder,
-  className,
-  ...props
-}) => {
-  const [field, meta] = useField<{}>(props);
-
-  return (
-    <TextField
-      className={className}
-      error={!!meta.error}
-      id="standard-error-helper-text"
-      variant="filled"
-      label={label}
-      margin="normal"
-      defaultValue={placeHolder}
-      helperText={meta.error}
-      {...field}
-    />
-  );
-};
 const ColorPickerForm = (props: any) => {
   const { colors, setColors, isPaletteFull } = props;
   const colorValidationSchema = yup.object().shape({
@@ -143,7 +111,7 @@ const ColorPickerForm = (props: any) => {
           isValid,
         }) => (
           <form onSubmit={handleSubmit}>
-            <MyColorPickerField
+            <MaterialField
               name="colorName"
               label="Choose your color"
               placeHolder="e.g. Red"

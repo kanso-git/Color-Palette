@@ -1,7 +1,4 @@
-import React, { useContext, useState } from "react";
-import { Formik, FormikHelpers } from "formik";
-import * as yup from "yup";
-import { withRouter, RouteComponentProps, Link } from "react-router-dom";
+import React, { useState } from "react";
 import clsx from "clsx";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import AppBar from "@material-ui/core/AppBar";
@@ -9,11 +6,7 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
-import {
-  ColorPaletteContext,
-  DispatchContext,
-} from "../context/colorPalette.context";
-import { IPalette, EActionType } from "../actions";
+
 import { Button } from "@material-ui/core";
 import {
   makeStyles,
@@ -21,6 +14,8 @@ import {
   Theme,
   createStyles,
 } from "@material-ui/core/styles";
+import PaletteMetaForm from "./PaletteMetaForm";
+import { Link } from "react-router-dom";
 
 const drawerWidth = 400;
 
@@ -59,17 +54,14 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const PaletteFormNav = (props: any) => {
   const classes = useStyles();
-  const schemaPaletteNameValidation = yup.object().shape({
-    paletteName: yup.string().min(3).required("Palette name already used"),
-  });
+
   const { open, setOpen, colors } = props;
-  const palettes = useContext(ColorPaletteContext);
-  const dispatch = useContext(DispatchContext);
 
   const handleDrawerOpen = () => {
     setOpen(true);
   };
 
+  const [dialogOpened, toggleDialog] = useState(false);
   return (
     <div>
       <CssBaseline />
@@ -95,61 +87,24 @@ const PaletteFormNav = (props: any) => {
           </Typography>
         </Toolbar>
         <div className={classes.navBtns}>
-          <Formik
-            initialValues={{ paletteName: "" }}
-            validationSchema={schemaPaletteNameValidation}
-            onSubmit={(values, actions) => {
-              const findPaletteName = palettes.find(
-                (p) =>
-                  p.paletteName.toLowerCase() ===
-                  values.paletteName.toLowerCase()
-              );
-              if (findPaletteName) {
-                actions.setErrors({
-                  paletteName: "Name already used ...",
-                });
-                return;
-              }
-              const newPalette: IPalette = {
-                id: values.paletteName.trim().replace(/\s/g, "-"),
-                paletteName: values.paletteName,
-                emoji: "FR",
-                colors,
-                colorsExtended: {},
-              };
-              dispatch({
-                type: EActionType.ADD,
-                payload: {
-                  newPalette,
-                },
-              });
-              props.history.push("/");
-            }}
-          >
-            {({ values, handleChange, handleSubmit, errors }) => (
-              <form onSubmit={handleSubmit}>
-                <input
-                  name="paletteName"
-                  value={values.paletteName}
-                  onChange={handleChange}
-                />
-                <span> {errors.paletteName}</span>
-                <Button variant="contained" color="primary" type="submit">
-                  Save Palette
-                </Button>
-              </form>
-            )}
-          </Formik>
+          <PaletteMetaForm colors={colors} dialogOpened={dialogOpened} />
 
           <Link to="/">
             <Button variant="contained" color="secondary">
               Go BACK
             </Button>
           </Link>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => toggleDialog(true)}
+          >
+            Save Palette
+          </Button>
         </div>
       </AppBar>
     </div>
   );
 };
 
-export default withRouter(PaletteFormNav);
+export default PaletteFormNav;
