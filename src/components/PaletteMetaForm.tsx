@@ -25,19 +25,16 @@ const useStyles = makeStyles({
 
 const PaletteMetaForm = (props: any) => {
   const classes = useStyles();
-  const { colors, dialogOpened } = props;
+  const { colors, dialogOpened, handleClose } = props;
   const [open, setOpen] = React.useState(false);
   const schemaPaletteNameValidation = yup.object().shape({
-    paletteName: yup.string().min(3).required("Palette name already used"),
+    paletteName: yup.string().min(3).required("Name is required"),
   });
   const palettes = useContext(ColorPaletteContext);
   const dispatch = useContext(DispatchContext);
 
-  const handleClose = () => {
-    setOpen(false);
-  };
   useEffect(() => {
-    if (dialogOpened) setOpen(true);
+    setOpen(dialogOpened);
   }, [dialogOpened]);
   return (
     <div>
@@ -51,6 +48,17 @@ const PaletteMetaForm = (props: any) => {
         <Formik
           initialValues={{ paletteName: "" }}
           validationSchema={schemaPaletteNameValidation}
+          validate={(values) => {
+            const errors: Record<string, string> = {};
+            const findPaletteName = palettes.find(
+              (p) =>
+                p.paletteName.toLowerCase() === values.paletteName.toLowerCase()
+            );
+            if (findPaletteName) {
+              errors.paletteName = "Name already used ...";
+            }
+            return errors;
+          }}
           onSubmit={(values, actions) => {
             const findPaletteName = palettes.find(
               (p) =>
@@ -61,21 +69,22 @@ const PaletteMetaForm = (props: any) => {
                 paletteName: "Name already used ...",
               });
               return;
+            } else {
+              const newPalette: IPalette = {
+                id: values.paletteName.trim().replace(/\s/g, "-"),
+                paletteName: values.paletteName,
+                emoji: "FR",
+                colors,
+                colorsExtended: {},
+              };
+              dispatch({
+                type: EActionType.ADD,
+                payload: {
+                  newPalette,
+                },
+              });
+              props.history.push("/");
             }
-            const newPalette: IPalette = {
-              id: values.paletteName.trim().replace(/\s/g, "-"),
-              paletteName: values.paletteName,
-              emoji: "FR",
-              colors,
-              colorsExtended: {},
-            };
-            dispatch({
-              type: EActionType.ADD,
-              payload: {
-                newPalette,
-              },
-            });
-            props.history.push("/");
           }}
         >
           {({ values, handleChange, handleSubmit, errors }) => (
@@ -97,12 +106,7 @@ const PaletteMetaForm = (props: any) => {
                 <Button onClick={handleClose} color="primary">
                   Cancel
                 </Button>
-                <Button
-                  onClick={handleClose}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                >
+                <Button variant="contained" color="primary" type="submit">
                   Save Palette
                 </Button>
               </DialogActions>

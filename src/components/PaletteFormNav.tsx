@@ -32,6 +32,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
       flexDirection: "row",
       justifyContent: "space-between",
+      alignItems: "center",
       height: "64px",
     },
     appBarShift: {
@@ -48,7 +49,15 @@ const useStyles = makeStyles((theme: Theme) =>
     hide: {
       display: "none",
     },
-    navBtns: {},
+    navBtns: {
+      marginRight: "1rem",
+    },
+    button: {
+      margin: "0 0.5rem",
+    },
+    link: {
+      textDecoration: "none",
+    },
   })
 );
 
@@ -87,15 +96,24 @@ const PaletteFormNav = (props: any) => {
           </Typography>
         </Toolbar>
         <div className={classes.navBtns}>
-          <PaletteMetaForm colors={colors} dialogOpened={dialogOpened} />
+          <PaletteMetaForm
+            colors={colors}
+            dialogOpened={dialogOpened}
+            handleClose={() => toggleDialog(false)}
+          />
 
-          <Link to="/">
-            <Button variant="contained" color="secondary">
+          <Link to="/" className={classes.link}>
+            <Button
+              className={classes.button}
+              variant="contained"
+              color="secondary"
+            >
               Go BACK
             </Button>
           </Link>
           <Button
-            variant="outlined"
+            className={classes.button}
+            variant="contained"
             color="primary"
             onClick={() => toggleDialog(true)}
           >
