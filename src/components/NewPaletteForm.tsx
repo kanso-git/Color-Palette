@@ -1,24 +1,12 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 import { withRouter, RouteComponentProps } from "react-router-dom";
 import clsx from "clsx";
 import Drawer from "@material-ui/core/Drawer";
-import CssBaseline from "@material-ui/core/CssBaseline";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import List from "@material-ui/core/List";
 import Typography from "@material-ui/core/Typography";
 import Divider from "@material-ui/core/Divider";
 import IconButton from "@material-ui/core/IconButton";
-import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
-import MailIcon from "@material-ui/icons/Mail";
 
-import { ChromePicker, ColorResult } from "react-color";
 import {
   makeStyles,
   useTheme,
@@ -26,15 +14,12 @@ import {
   createStyles,
 } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
-import DraggableColorBox from "./DraggableColorBox";
-import { ValidatorForm, TextValidator } from "react-material-ui-form-validator";
-import { IPalette, EActionType } from "../actions";
-import {
-  DispatchContext,
-  ColorPaletteContext,
-} from "../context/colorPalette.context";
+
+import { ColorPaletteContext } from "../context/colorPalette.context";
 import DraggableColorList from "./DraggableColorList";
 import { arrayMove } from "react-sortable-hoc";
+import PaletteFormNav from "./PaletteFormNav";
+import ColorPickerForm from "./ColorPickerForm";
 
 const drawerWidth = 400;
 const maxColorBoxInPalette = 20;
@@ -43,32 +28,14 @@ const useStyles = makeStyles((theme: Theme) =>
     root: {
       display: "flex",
     },
-    appBar: {
-      transition: theme.transitions.create(["margin", "width"], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
-    },
-    appBarShift: {
-      width: `calc(100% - ${drawerWidth}px)`,
-      marginLeft: drawerWidth,
-      transition: theme.transitions.create(["margin", "width"], {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-    },
-    menuButton: {
-      marginRight: theme.spacing(2),
-    },
-    hide: {
-      display: "none",
-    },
     drawer: {
       width: drawerWidth,
       flexShrink: 0,
     },
     drawerPaper: {
       width: drawerWidth,
+      display: "flex",
+      alignItems: "center",
     },
     drawerHeader: {
       display: "flex",
@@ -95,6 +62,20 @@ const useStyles = makeStyles((theme: Theme) =>
       }),
       marginLeft: 0,
     },
+    container: {
+      height: "100%",
+      width: "90%",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    btns: {
+      width: "100%",
+    },
+    btn: {
+      width: "50%",
+    },
   })
 );
 
@@ -106,96 +87,13 @@ export interface NewColorProps {
 const NewPaletteForm = (props: RouteComponentProps) => {
   const classes = useStyles();
   const palettes = useContext(ColorPaletteContext);
-  const theme = useTheme();
-
-  const dispatch = useContext(DispatchContext);
 
   const [open, setOpen] = useState(false);
   const [colors, setColors] = useState<NewColorProps[]>(palettes[0].colors);
-  const [color, setColor] = useState<string>("yellow");
-  const [colorName, setColorName] = useState<string>("");
-  const [paletteName, setPaletteName] = useState<string>("");
 
   const isPaletteFull = colors.length >= maxColorBoxInPalette;
-
-  useEffect(() => {
-    ValidatorForm.addValidationRule("colorNameUnique", (value) => {
-      if (colors.find((c) => c.name.toLowerCase() === value.toLowerCase())) {
-        return false;
-      }
-      return true;
-    });
-
-    ValidatorForm.addValidationRule("colorUnique", () => {
-      console.log(color);
-      if (colors.find((c) => c.color === color)) {
-        return false;
-      }
-      return true;
-    });
-
-    ValidatorForm.addValidationRule("paletteNameUnique", (value) => {
-      if (
-        palettes.find(
-          (p) => p.paletteName.toLowerCase() === value.toLowerCase()
-        )
-      ) {
-        return false;
-      }
-      return true;
-    });
-
-    return () => {
-      ValidatorForm.removeValidationRule("colorNameUnique");
-      ValidatorForm.removeValidationRule("colorUnique");
-      ValidatorForm.removeValidationRule("paletteNameUnique");
-    };
-  }, [color, colorName, paletteName]);
-
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
   const handleDrawerClose = () => {
     setOpen(false);
-  };
-
-  const handleColorChangeComplete = (color: ColorResult) => {
-    setColor(color.hex);
-  };
-
-  const handleAddNewColor = () => {
-    const newColor = {
-      color,
-      name: colorName,
-    };
-    setColors(colors.concat(newColor));
-    setColorName("");
-  };
-
-  const handleNewNameChange = (e: any) => {
-    setColorName(e.target.value);
-  };
-
-  const handlePaletteNameChange = (e: any) => {
-    setPaletteName(e.target.value);
-  };
-
-  const handleSavePalette = () => {
-    const newPalette: IPalette = {
-      id: paletteName.trim().replace(/\s/g, "-"),
-      paletteName: paletteName,
-      emoji: "FR",
-      colors,
-      colorsExtended: {},
-    };
-    dispatch({
-      type: EActionType.ADD,
-      payload: {
-        newPalette,
-      },
-    });
-    props.history.push("/");
   };
 
   const handleDeleteBoxByName = (name: string) => {
@@ -217,48 +115,8 @@ const NewPaletteForm = (props: RouteComponentProps) => {
   };
   return (
     <div className={classes.root}>
-      <CssBaseline />
-      <AppBar
-        position="fixed"
-        color="default"
-        className={clsx(classes.appBar, {
-          [classes.appBarShift]: open,
-        })}
-      >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            className={clsx(classes.menuButton, open && classes.hide)}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap>
-            Persistent drawer
-          </Typography>
-          <ValidatorForm
-            onSubmit={handleSavePalette}
-            onError={() => alert("on error")}
-          >
-            <TextValidator
-              name={paletteName}
-              value={paletteName}
-              onChange={handlePaletteNameChange}
-              validators={["required", "paletteNameUnique"]}
-              errorMessages={[
-                "this field is required",
-                "Palette Name Already Taken",
-              ]}
-            />
+      <PaletteFormNav open={open} setOpen={setOpen} colors={colors} />
 
-            <Button variant="contained" color="primary" type="submit">
-              Save Palette
-            </Button>
-          </ValidatorForm>
-        </Toolbar>
-      </AppBar>
       <Drawer
         className={classes.drawer}
         variant="persistent"
@@ -274,63 +132,41 @@ const NewPaletteForm = (props: RouteComponentProps) => {
           </IconButton>
         </div>
         <Divider />
-        <Typography variant="h4">Design Your Palette</Typography>
+        <div className={classes.container}>
+          <Typography variant="h4" gutterBottom>
+            Design Your Palette
+          </Typography>
 
-        <div>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => setColors([])}
-          >
-            Clear Palette
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={addRandomColor}
-            style={{
-              backgroundColor: isPaletteFull ? "grey" : "",
-            }}
-            disabled={isPaletteFull}
-          >
-            Random Color
-          </Button>
-        </div>
-
-        <ChromePicker
-          color={color}
-          onChangeComplete={handleColorChangeComplete}
-        />
-
-        <ValidatorForm
-          onSubmit={handleAddNewColor}
-          onError={() => alert("on error")}
-        >
-          <TextValidator
-            name={colorName}
-            value={colorName}
-            onChange={handleNewNameChange}
-            validators={["required", "colorNameUnique", "colorUnique"]}
-            errorMessages={[
-              "this field is required",
-              "Color Name Already Taken",
-              "RGBA Color already Taken",
-            ]}
+          <div className={classes.btns}>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => setColors([])}
+              className={classes.btn}
+            >
+              Clear Palette
+            </Button>
+            <Button
+              className={classes.btn}
+              variant="contained"
+              color="primary"
+              onClick={addRandomColor}
+              style={{
+                backgroundColor: isPaletteFull ? "grey" : "",
+              }}
+              disabled={isPaletteFull}
+            >
+              Random Color
+            </Button>
+          </div>
+          <ColorPickerForm
+            colors={colors}
+            isPaletteFull={isPaletteFull}
+            setColors={setColors}
           />
-
-          <Button
-            variant="contained"
-            disabled={isPaletteFull}
-            color="primary"
-            type="submit"
-            style={{
-              backgroundColor: isPaletteFull ? "grey" : color,
-            }}
-          >
-            {isPaletteFull ? "Palette Full" : "Add Color"}
-          </Button>
-        </ValidatorForm>
+        </div>
       </Drawer>
+
       <main
         className={clsx(classes.content, {
           [classes.contentShift]: open,
