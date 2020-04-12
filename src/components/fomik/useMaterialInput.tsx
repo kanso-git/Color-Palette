@@ -21,9 +21,9 @@ const MaterialField: React.FC<MaterialFieldProps> = ({
       error={!!meta.error && meta.touched}
       id="standard-error-helper-text"
       variant="filled"
+      name={field.name}
       label={label}
       margin="normal"
-      defaultValue={placeHolder}
       helperText={meta.error && meta.touched && meta.error}
       {...field}
     />
