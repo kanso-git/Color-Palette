@@ -1,6 +1,7 @@
 import chroma from "chroma-js";
 import { makeStyles } from "@material-ui/styles";
 import { ColorBoxProps } from "../components/ColorBox";
+import sizes from "../styles/sizes";
 
 export default makeStyles({
   colorBox: {
@@ -16,6 +17,12 @@ export default makeStyles({
     "&:hover button": {
       opacity: 1,
       transition: "0.5s",
+    },
+    [sizes.down("xs")]: {
+      width: "100%",
+      height: ({ isForSinglePalette }: ColorBoxProps) => {
+        return isForSinglePalette ? "10%" : "5%";
+      },
     },
   },
   copyText: {
